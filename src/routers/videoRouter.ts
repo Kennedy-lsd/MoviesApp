@@ -1,17 +1,23 @@
-import { getAllVideos, createVideo, deleteVideo, getOneVideo, updateVideo } from "../controllers/videoController";
+import {
+  getAllVideos,
+  createVideo,
+  deleteVideo,
+  getOneVideo,
+  updateVideo,
+} from "../controllers/videoController";
 import { Router } from "express";
+import { handleRequest } from "../utils/middlewares/uuidHandler";
 
-const router = Router()
+const router = Router();
 
+router.get("/api/videos", getAllVideos);
 
-router.get("/api/videos", getAllVideos)
+router.post("/api/videos", createVideo);
 
-router.post("/api/videos", createVideo)
+router.delete("/api/videos/:id", handleRequest, deleteVideo);
 
-router.delete("/api/videos/:id", deleteVideo)
+router.get("/api/videos/:id", handleRequest, getOneVideo);
 
-router.get("/api/videos/:id", getOneVideo)
+router.patch("/api/videos/:id", handleRequest, updateVideo);
 
-router.patch("/api/videos/:id", updateVideo)
-
-export default router
+export default router;

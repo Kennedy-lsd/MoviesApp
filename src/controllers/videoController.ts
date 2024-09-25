@@ -3,6 +3,7 @@ import { VideoTable } from "../schemas/video";
 import { eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import VideoTableValidator from "../utils/validatorSchemas/videoTableValidator";
+import { VideoType } from "../utils/types/types";
 
 const getAllVideos = async (req: Request, res: Response) => {
   try {
@@ -19,7 +20,7 @@ const getAllVideos = async (req: Request, res: Response) => {
 };
 
 const getOneVideo = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.params as {id: string};
 
   if (!id) {
     return res.status(400).json({ message: "Invalid video id" });
@@ -41,7 +42,7 @@ const getOneVideo = async (req: Request, res: Response) => {
 };
 
 const createVideo = async (req: Request, res: Response) => {
-  const videoData = req.body;
+  const videoData: VideoType = req.body;
 
   const validationResult = VideoTableValidator.safeParse(videoData);
   console.log(validationResult);
@@ -68,7 +69,7 @@ const createVideo = async (req: Request, res: Response) => {
 };
 
 const deleteVideo = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.params as {id: string};
 
   if (!id) {
     return res.status(400).json({ message: "Invalid video id" });
@@ -90,11 +91,12 @@ const deleteVideo = async (req: Request, res: Response) => {
 };
 
 const updateVideo = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.params as {id: string};
+  const data: VideoType = req.body;
   try {
     const updatedVideo = await db
       .update(VideoTable)
-      .set(req.body)
+      .set(data)
       .where(eq(VideoTable.id, id))
       .returning();
 
