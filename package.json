@@ -1,0 +1,31 @@
+{
+  "name": "video-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/index.ts",
+    "db:gn": "npx drizzle-kit generate",
+    "db:mg": "tsx src/drizzle/migrate.ts",
+    "db:sh": "npx drizzle-kit studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/node": "^22.6.0",
+    "body-parser": "^1.20.3",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.33.0",
+    "tsx": "^4.19.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "drizzle-kit": "^0.24.2",
+    "express": "^4.21.0",
+    "postgres": "^3.4.4",
+    "typescript": "^5.6.2",
+    "zod": "^3.23.8"
+  }
+}
