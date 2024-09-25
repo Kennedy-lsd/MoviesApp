@@ -17,7 +17,17 @@ if (!process.env.DB_URL) {
 }
 
 const client = postgres(process.env.DB_URL as string);
-const db = drizzle(client, {schema: combinedSchema, logger: true})
 
+(async () => {
+  try {
+    await client`SELECT 1`; 
+    console.log("Successfully connected to the database.");
+  } catch (error: any) {
+    console.error("Failed to connect to the database:", error.message);
+    process.exit(1);
+  }
+})();
+
+const db = drizzle(client, { schema: combinedSchema, logger: true });
 
 export { db };
