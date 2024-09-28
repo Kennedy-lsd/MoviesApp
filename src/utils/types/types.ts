@@ -9,4 +9,10 @@ export type VideoType = {
     title: string
     url: string
     description: string
+    imageId: string
+}
+
+export type ImageData = {
+    image: string
+    
 }
