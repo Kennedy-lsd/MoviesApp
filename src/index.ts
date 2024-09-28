@@ -1,6 +1,7 @@
 import express from "express";
 import videoRouter from "../src/routers/videoRouter"
 import userRouter from "../src/routers/userRouter"
+import imageRouter from "../src/routers/imageRouter"
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 
@@ -15,7 +16,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 //Routes
 app.use(videoRouter);
-app.use(userRouter)
+app.use(userRouter);
+app.use(imageRouter)
 
 
 app.listen(PORT, () => {
