@@ -4,7 +4,8 @@ import { Request, Response } from "express";
 import { eq } from "drizzle-orm";
 import userTableValidator from "../utils/validatorSchemas/userTableValidator";
 import { UserData } from "../utils/types/types";
-
+import { hashPassword, comparePassword } from "../utils/crypt/passwordCrypt";
+import jwt from 'jsonwebtoken'
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await db.select().from(UserTable);
@@ -56,6 +57,8 @@ const createUser = async (req: Request, res: Response) => {
   try {
     const validatedData = validationResult.data;
 
+    validatedData.password = await hashPassword(validatedData.password);
+
     const newUser = await db
       .insert(UserTable)
       .values(validatedData)
@@ -106,4 +109,36 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
-export { getAllUsers, getOneUser, createUser, deleteUser, updateUser };
+const authenticateUser = async (req: Request, res: Response) => {
+  const emailData: UserData = req.body;
+  try {
+    const user = await db
+      .select()
+      .from(UserTable)
+      .where(eq(UserTable.email, emailData.email));
+
+    if (!user.length) {
+      return res.status(401).json({ error: "Invalid Email" });
+    }
+    const foundUser = user[0];
+
+    const { username, avatar } = foundUser
+
+    if (!comparePassword(emailData.password, foundUser.password)) {
+      return res.status(401).json({ error: "Invalid Username or Password" });
+    }
+
+    if (emailData.username !== username) {
+      return res.status(401).json({ error: "Invalid Username or Password" });
+
+    }
+    const token = jwt.sign({ email: foundUser.email }, "secret")
+
+    return res.status(200).json({ token, username, avatar})
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export { getAllUsers, getOneUser, createUser, deleteUser, updateUser, authenticateUser };

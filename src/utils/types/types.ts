@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export type UserData = {
     image: string
     email: string
@@ -15,4 +17,12 @@ export type VideoType = {
 export type ImageData = {
     image: string
     
+}
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: any; 
+    }
+  }
 }

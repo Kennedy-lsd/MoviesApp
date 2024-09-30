@@ -7,7 +7,7 @@ export const UserTable = pgTable("Users", {
     avatar: varchar("avatar").notNull(),
     email: varchar("email", {length: 20}).notNull(),
     username: varchar("username").notNull(),
-    password: varchar("password", {length: 10}).notNull()
+    password: varchar("password", {length: 120}).notNull()
 }, (table) => {
     return {
         emailIndex: uniqueIndex("emailIndex").on(table.email)
