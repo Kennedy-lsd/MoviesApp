@@ -1,7 +1,7 @@
 import { Request } from 'express';
 
 export type UserData = {
-    image: string
+    avatar: string | undefined
     email: string
     username: string
     password: string

@@ -5,7 +5,8 @@ import { eq } from "drizzle-orm";
 import userTableValidator from "../utils/validatorSchemas/userTableValidator";
 import { UserData } from "../utils/types/types";
 import { hashPassword, comparePassword } from "../utils/crypt/passwordCrypt";
-import jwt from 'jsonwebtoken'
+import jwt from "jsonwebtoken";
+
 const getAllUsers = async (req: Request, res: Response) => {
   try {
     const result = await db.select().from(UserTable);
@@ -42,34 +43,46 @@ const getOneUser = async (req: Request, res: Response) => {
   }
 };
 
+
+
 const createUser = async (req: Request, res: Response) => {
-  const userData: UserData = req.body;
+  
+    const userData: UserData = req.body;
+  
+    const validationResult = userTableValidator.safeParse(userData);
+  
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: "Validation failed",
+        details: validationResult.error.errors,
+      });
+    }
+  
+    try {
+      const validatedData = validationResult.data;
+  
+      validatedData.password = await hashPassword(validatedData.password);
+  
+      if (!req.file) {
+        return res.status(400).json({ message: "File upload failed, no file received" });
+      }
+  
+      validatedData.avatar = req.file.path as string
+      
+      
+      const newUser = await db
+        .insert(UserTable)
+        .values(validatedData)
+        .returning();
+  
+      res.status(201).json(newUser[0]);
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
 
-  const validationResult = userTableValidator.safeParse(userData);
 
-  if (!validationResult.success) {
-    return res.status(400).json({
-      error: "Validation failed",
-      details: validationResult.error.errors,
-    });
-  }
-
-  try {
-    const validatedData = validationResult.data;
-
-    validatedData.password = await hashPassword(validatedData.password);
-
-    const newUser = await db
-      .insert(UserTable)
-      .values(validatedData)
-      .returning();
-
-    res.status(200).json(newUser[0]);
-  } catch (error: any) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
@@ -122,7 +135,7 @@ const authenticateUser = async (req: Request, res: Response) => {
     }
     const foundUser = user[0];
 
-    const { username, avatar } = foundUser
+    const { username, avatar } = foundUser;
 
     if (!comparePassword(emailData.password, foundUser.password)) {
       return res.status(401).json({ error: "Invalid Username or Password" });
@@ -130,15 +143,21 @@ const authenticateUser = async (req: Request, res: Response) => {
 
     if (emailData.username !== username) {
       return res.status(401).json({ error: "Invalid Username or Password" });
-
     }
-    const token = jwt.sign({ email: foundUser.email }, "secret")
+    const token = jwt.sign({ email: foundUser.email }, "secret");
 
-    return res.status(200).json({ token, username, avatar})
+    return res.status(200).json({ token, username, avatar });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-export { getAllUsers, getOneUser, createUser, deleteUser, updateUser, authenticateUser };
+export {
+  getAllUsers,
+  getOneUser,
+  createUser,
+  deleteUser,
+  updateUser,
+  authenticateUser,
+};
