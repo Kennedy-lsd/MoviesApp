@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const userTableValidator = z.object({
   id: z.string().uuid().optional(),
-  avatar: z.string().min(1, "Avatar is reqiured"),
+  avatar: z.string().min(1, "Avatar is reqiured").default("avatar.png"),
   email: z.string().email("@ is missing"),
   username: z.string().min(1, "Username is required"),
   password: z

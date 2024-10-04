@@ -23,6 +23,7 @@ const getAllUsers = async (req: Request, res: Response) => {
 
 const getOneUser = async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
+  console.log(id);
 
   if (!id) {
     return res.status(400).json({ message: "Invalid user id" });
@@ -43,46 +44,42 @@ const getOneUser = async (req: Request, res: Response) => {
   }
 };
 
-
-
 const createUser = async (req: Request, res: Response) => {
-  
-    const userData: UserData = req.body;
-  
-    const validationResult = userTableValidator.safeParse(userData);
-  
-    if (!validationResult.success) {
-      return res.status(400).json({
-        error: "Validation failed",
-        details: validationResult.error.errors,
-      });
-    }
-  
-    try {
-      const validatedData = validationResult.data;
-  
-      validatedData.password = await hashPassword(validatedData.password);
-  
-      if (!req.file) {
-        return res.status(400).json({ message: "File upload failed, no file received" });
-      }
-  
-      validatedData.avatar = req.file.path as string
-      
-      
-      const newUser = await db
-        .insert(UserTable)
-        .values(validatedData)
-        .returning();
-  
-      res.status(201).json(newUser[0]);
-    } catch (error: any) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
-  };
+  const userData: UserData = req.body;
 
+  const validationResult = userTableValidator.safeParse(userData);
 
+  if (!validationResult.success) {
+    return res.status(400).json({
+      error: "Validation failed",
+      details: validationResult.error.errors,
+    });
+  }
+
+  try {
+    const validatedData = validationResult.data;
+
+    validatedData.password = await hashPassword(validatedData.password);
+
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ message: "File upload failed, no file received" });
+    }
+
+    validatedData.avatar = req.file.path as string;
+
+    const newUser = await db
+      .insert(UserTable)
+      .values(validatedData)
+      .returning();
+
+    res.status(201).json(newUser[0]);
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
@@ -135,7 +132,7 @@ const authenticateUser = async (req: Request, res: Response) => {
     }
     const foundUser = user[0];
 
-    const { username, avatar } = foundUser;
+    const { username, avatar, email } = foundUser;
 
     if (!comparePassword(emailData.password, foundUser.password)) {
       return res.status(401).json({ error: "Invalid Username or Password" });
@@ -146,10 +143,29 @@ const authenticateUser = async (req: Request, res: Response) => {
     }
     const token = jwt.sign({ email: foundUser.email }, "secret");
 
-    return res.status(200).json({ token, username, avatar });
+    return res.status(200).json({ token, username, avatar, email });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const getUserStatus = async (req: Request, res: Response) => {
+  try {
+    const result = await db
+      .select()
+      .from(UserTable)
+      .where(eq(UserTable.email, req.user.email));
+    if (!result.length) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    const statusData = result[0];
+
+    const { username, avatar } = statusData;
+    res.status(200).json({ username,  avatar });
+  } catch (error: any) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 };
 
@@ -160,4 +176,5 @@ export {
   deleteUser,
   updateUser,
   authenticateUser,
+  getUserStatus,
 };
