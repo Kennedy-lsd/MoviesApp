@@ -5,7 +5,8 @@ const VideoTableValidator = z.object({
   title: z.string().min(1, "Title is required"),
   url: z.string().url("Invalid URL"),
   description: z.string().min(1, "Description is required"),
-  imageId: z.string().uuid()
+  group: z.string().min(1, "Required"),
+  imageId: z.string().uuid(),
 });
 
 

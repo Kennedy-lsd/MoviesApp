@@ -6,7 +6,6 @@ import {
   updateVideo,
 } from "../controllers/videoController";
 import { Router } from "express";
-import { handleRequest } from "../utils/middlewares/uuidHandler";
 
 const router = Router();
 
@@ -14,10 +13,10 @@ router.get("/api/videos", getAllVideos);
 
 router.post("/api/videos", createVideo);
 
-router.delete("/api/videos/:id", handleRequest, deleteVideo);
+router.delete("/api/videos/:id",  deleteVideo);
 
-router.get("/api/videos/:id", handleRequest, getOneVideo);
+router.get("/api/videos/:id",  getOneVideo);
 
-router.patch("/api/videos/:id", handleRequest, updateVideo);
+router.patch("/api/videos/:id",  updateVideo);
 
 export default router;

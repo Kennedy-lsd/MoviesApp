@@ -16,6 +16,7 @@ export const VideoTable = pgTable(
     title: varchar("title").notNull(),
     url: varchar("url").notNull(),
     description: varchar("description").notNull(),
+    group: varchar("group").notNull(),
     imageId: uuid("imageId")
     .references(() => ImagesForVideoTable.id)
     .notNull(),

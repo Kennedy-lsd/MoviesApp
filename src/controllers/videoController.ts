@@ -1,23 +1,45 @@
 import { db } from "../drizzle/db";
-import { VideoTable } from "../schemas/video";
+import { VideoTable, ImagesForVideoTable } from "../schemas/video";
 import { eq } from "drizzle-orm";
 import { Request, Response } from "express";
 import VideoTableValidator from "../utils/validatorSchemas/videoTableValidator";
 import { VideoType } from "../utils/types/types";
 
+
+
 const getAllVideos = async (req: Request, res: Response) => {
+  const { group } = req.query;
+
+  const filters: { group?: string } = {};
+
+  if (group) {
+    filters.group = group as string; 
+  }
+
   try {
-    const result = await db.select().from(VideoTable);
+    const query = db
+      .select()
+      .from(VideoTable)
+      .leftJoin(ImagesForVideoTable, eq(VideoTable.imageId, ImagesForVideoTable.id));
+
+    if (filters.group) {
+      query.where(eq(VideoTable.group, filters.group)); 
+    }
+
+    const result = await query;
 
     if (!result.length) {
-      return res.status(404).json({message: "Not found"})
+      return res.status(404).json({ message: "Not found" });
     }
+
     res.status(200).json(result);
   } catch (error: any) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
 
 const getOneVideo = async (req: Request, res: Response) => {
   const { id } = req.params as {id: string};
