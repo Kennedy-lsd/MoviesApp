@@ -6,18 +6,19 @@ import {
   deleteImage,
   updateImage,
 } from "../controllers/imageController";
-import { handleRequest } from "../utils/middlewares/uuidHandler";
+import upload from "../utils/multerConfig";
+import validateImage from "../utils/middlewares/imageValidation";
 
 const router = Router();
 
 router.get("/api/images", getAllImages);
 
-router.post("/api/images", createImage);
+router.post("/api/images",upload.single('image'), validateImage, createImage);
 
-router.get("/api/images/:id", handleRequest, getOneImage);
+router.get("/api/images/:id",  getOneImage);
 
-router.delete("/api/images/:id", handleRequest, deleteImage);
+router.delete("/api/images/:id",  deleteImage);
 
-router.patch("/api/images/:id", handleRequest, updateImage);
+router.patch("/api/images/:id", upload.single('image'),  updateImage);
 
 export default router;

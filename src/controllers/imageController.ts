@@ -83,6 +83,10 @@ const deleteImage = async (req: Request, res: Response) => {
 const updateImage = async (req: Request, res: Response) => {
   const { id } = req.params as { id: string };
   const data: ImageData = req.body;
+  console.log(data);
+
+  data.image = req.file?.path as string;
+  
   try {
     const result = await db
       .update(ImagesForVideoTable)
@@ -95,6 +99,7 @@ const updateImage = async (req: Request, res: Response) => {
     }
     res.status(200).json(result[0]);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Server error" });
   }
 };
