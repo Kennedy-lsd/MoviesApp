@@ -52,7 +52,9 @@ const getOneVideo = async (req: Request, res: Response) => {
     const result = await db
       .select()
       .from(VideoTable)
-      .where(eq(VideoTable.id, id));
+      .where(eq(VideoTable.id, id))
+      .leftJoin(ImagesForVideoTable, eq(VideoTable.imageId, ImagesForVideoTable.id));
+
 
     if (!result.length) {
       return res.status(404).json({ message: "Not found" });
